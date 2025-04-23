@@ -4,7 +4,7 @@ A C++ implementation of the **diffusion-limited cluster-cluster aggregation** (D
 
 # Usage
 
-1. Parameters
+1. Simulation Parameters
 
     - ```[D]``` Dimension of the grid.
 
@@ -12,9 +12,34 @@ A C++ implementation of the **diffusion-limited cluster-cluster aggregation** (D
 
     - ```[N]``` Number of particles in the grid.
 
-    - ```[F]``` The output file name, without ```.txt``` suffix. E.g. ```output/D2.L10.N10```.
+    - ```[F]``` The output file name (without file extension) saved to the filepath "L[L]_phi[volume fraction of spheres to 3 decimals]/[F].csv"
 
-    - ```[P]``` The period for snapshots.
+    - ```[*C]``` The simulation style, either 0 (cluster based) or 1 (counter based)
+
+    - ```[*S]``` The number of snapshots in a cluster-limited style simulation 
+
+2. Single run
+
+    - Linux
+
+        ```
+        # C++11 support required
+        cd /path/to/clone
+        module load cmake/3.18.1 
+        make
+        ```
+
+        ```
+        cd /path/to/clone
+        bin/dlca [D] [L] [N] [F] [*C] [*S]
+        ```
+
+     - results are saved to a LOG file and a CSV files
+     - the CSV file contains: iteration number, cluster number, particle label, cluster label, cluster coordinates (x,y,z)
+
+3. Visualization Parameters
+
+    - ```[P]``` The period for snapshots
 
     - ```[I]``` The number of iterations.
 
@@ -24,33 +49,7 @@ A C++ implementation of the **diffusion-limited cluster-cluster aggregation** (D
 
     - ```[AZIM]``` The azimuthal angle.
 
-2. Single run
-
-    - Windows
-
-        - 32-bit
-
-            ```
-            exe\win32\DLCA.exe [D] [L] [N] [F]
-            ```
-
-        - 64-bit
-
-            ```
-            exe\win64\DLCA.exe [D] [L] [N] [F]
-            ```
-    - Linux
-
-        ```
-        # C++11 support required
-        make
-        ```
-
-        ```
-        bin/dlca [D] [L] [N] [F]
-        ```
-
-3. Plotting single run ([Python](https://www.python.org/), [NumPy](http://www.numpy.org/), and [matplotlib](http://matplotlib.org/) required)
+4. Plotting single run ([Python](https://www.python.org/), [NumPy](http://www.numpy.org/), and [matplotlib](http://matplotlib.org/) required)
 
     - 2D
 
@@ -64,7 +63,7 @@ A C++ implementation of the **diffusion-limited cluster-cluster aggregation** (D
         python plot_3d.py [L] [INPUT] [OUTPUT] [M] [ELEV] [AZIM]
         ```
 
-4. Creating GIF ([ImageMagick](http://www.imagemagick.org/) required)
+5. Creating GIF ([ImageMagick](http://www.imagemagick.org/) required)
 
     - Windows
 
