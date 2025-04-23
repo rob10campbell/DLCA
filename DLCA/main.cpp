@@ -26,8 +26,8 @@
 #include <ctime>
 #include <string>
 #include <math.h>
-#include <io.h>
-#include <direct.h>
+#include <unistd.h> // for Linux [RHEOINF]
+#include <sys/stat.h> // for Linux [RHEOINF]
 
 using namespace std;
 using std::cin;
@@ -109,11 +109,12 @@ int main(int argc, char *argv[]) {
 	int current_step = 1;
 
 	char foldername[buffer_size];
-	sprintf(foldername, "%s_D%d_L%d_N%d_SS%d_ST%d", chartime, dimension, L, N, snapshot_style, snapshot_time);
-	if (0 != _access(foldername, 0))
+	//sprintf(foldername, "%s_D%d_L%d_N%d_SS%d_ST%d", chartime, dimension, L, N, snapshot_style, snapshot_time);
+	sprintf(foldername, "L%d_phi%d", L, round((((4/3)*M_PI*pow(1,3)*N)/pow(L,3)) * 100)/ 100); // change filename for 3D sim with spheres [RHEOINF]
+	if (0 != access(foldername, 0)) // for Linux [RHEOINF]
 	{
 		// if this folder not exist, create a new one.
-		_mkdir(foldername);   // 返回 0 表示创建成功，-1 表示失败
+		mkdir(foldername, 0755); // for Linux: 0755 gives read/write/execute for owner, read/execute for others) [RHEOINF] // 返回 0 表示创建成功，-1 表示失败
 	}
     Dlca *p_dlca;
 
@@ -166,7 +167,8 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 	char logfilename[buffer_size];
-	sprintf(logfilename, "%s\\log_D%d_L%d_N%d.txt", foldername, dimension, L, N);
+	//sprintf(logfilename, "%s\\log_D%d_L%d_N%d.txt", foldername, dimension, L, N);
+	sprintf(logfilename, "%s/log.txt", foldername); // change filename [RHEOINF]
     for (;;) {
         int num_clusters = p_dlca->get_num_clusters();
         int counter = p_dlca->get_counter();
@@ -179,7 +181,8 @@ int main(int argc, char *argv[]) {
 		if (counter == 0 && num_clusters>1) {
 			char snapshot_filename[buffer_size];			
 			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d_C%d_I%d_INITIAL.csv", foldername, output_filename_, dimension, L, N, num_clusters,counter);
-			sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+			sprintf(snapshot_filename, "%s/%s.csv", foldername, output_filename_); // change filename [RHEOINF]
 			ofstream ofs_snapshot(snapshot_filename, ios::app);
 			if (!ofs_snapshot) {
 				cerr << "Failed to open file " << snapshot_filename << endl;
@@ -224,7 +227,8 @@ int main(int argc, char *argv[]) {
 			char snapshot_filename[buffer_size];
 			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d_C%d_I%d.csv", foldername, output_filename_, dimension, L, N, num_clusters, counter);
 			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d_INTERMEDIATE.csv", foldername, output_filename_, dimension, L, N);
-			sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+			sprintf(snapshot_filename, "%s/%s.csv", foldername, output_filename_); // change filename [RHEOINF]
 			ofstream ofs_snapshot(snapshot_filename,ios::app);
 			if (!ofs_snapshot) {
 				cerr << "Failed to open file " << snapshot_filename << endl;
@@ -250,7 +254,8 @@ int main(int argc, char *argv[]) {
             char snapshot_filename[buffer_size];
             //sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d_C%d_I%d.csv", foldername,output_filename_, dimension, L, N, num_clusters, counter);
 			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d_INTERMEDIATE.csv", foldername, output_filename_, dimension, L, N);
-			sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+			//sprintf(snapshot_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+			sprintf(snapshot_filename, "%s/%s.csv", foldername, output_filename_); // change filename [RHEOINF]
             ofstream ofs_snapshot(snapshot_filename, ios::app);
             if (!ofs_snapshot) {
                 cerr << "Failed to open file " << snapshot_filename << endl;
@@ -297,7 +302,8 @@ int main(int argc, char *argv[]) {
 
     char output_filename[buffer_size];
 	//sprintf(output_filename, "%s\\%s_D%d_L%d_N%d_C%d_I%d_FINAL.csv", foldername, output_filename_, dimension, L, N, p_dlca->get_num_clusters(), p_dlca->get_counter());
-	sprintf(output_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+	//sprintf(output_filename, "%s\\%s_D%d_L%d_N%d.csv", foldername, output_filename_, dimension, L, N);
+	sprintf(output_filename, "%s/%s.csv", foldername, output_filename_); // change filename [RHEOINF]
 	ofstream ofs_result(output_filename, ios::app);
     if (!ofs_result) {
         cerr << "Failed to open file " << output_filename << endl;
