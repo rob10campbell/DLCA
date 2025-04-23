@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 	char foldername[buffer_size];
 	//sprintf(foldername, "%s_D%d_L%d_N%d_SS%d_ST%d", chartime, dimension, L, N, snapshot_style, snapshot_time);
 	double phi = round((((4.0/3.0)*M_PI*pow(1,3)*N)/pow(L,3)) * 1000) / 1000.0; // calculate volume fraction [RHEOINF]
-        std::cout << phi << std::endl;
+        //std::cout << phi << std::endl;
 	sprintf(foldername, "L%d_phi%.3f", L, phi); // change filename for 3D sim with spheres [RHEOINF]
 	if (0 != access(foldername, 0)) // for Linux [RHEOINF]
 	{
