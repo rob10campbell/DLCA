@@ -16,7 +16,7 @@ A C++ implementation of the **diffusion-limited cluster-cluster aggregation** (D
 
     - ```[*C]``` The simulation style, either 0 (cluster based) or 1 (counter based)
 
-    - ```[*S]``` The number of snapshots in a cluster-limited style simulation 
+    - ```[*S]``` The number of snapshots in a cluster-based style simulation 
 
 2. Single run
 
