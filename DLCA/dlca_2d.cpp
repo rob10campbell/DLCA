@@ -33,8 +33,21 @@ int Dlca2D::get_num_grid_from_L(int L) {
     return L * L;
 }
 
-Dlca2D::Dlca2D(int L, int N):
-        Dlca(N, get_num_grid_from_L(L)),
+//Dlca2D::Dlca2D(int L, int N):
+//        Dlca(N, get_num_grid_from_L(L)),
+Dlca2D::Dlca2D(int L, int N,
+               int N_small,
+               int N_large,
+               double R_small,
+               double R_large,
+               double phi_large) :
+    Dlca(N,
+         get_num_grid_from_L(L),
+         N_small,
+         N_large,
+         R_small,
+         R_large,
+         phi_large),
         L(L),
         x_(new int[N]),
         y_(new int[N]) {

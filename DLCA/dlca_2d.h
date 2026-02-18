@@ -27,7 +27,12 @@ public:
     static int get_num_grid_from_L(int L);
 
     // Initialize with L (grid size, unchecked) and N (number of particles, unchecked)
-    explicit Dlca2D(int L, int N);
+    explicit Dlca2D(int L, int N,
+       int N_small,
+       int N_large,
+       double R_small,
+       double R_large,
+       double phi_large);
     ~Dlca2D();
 
     friend ostream &operator<<(ostream &os, const Dlca2D &dlca_2d);

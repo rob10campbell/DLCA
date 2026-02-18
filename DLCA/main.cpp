@@ -72,8 +72,13 @@ const char *chartime = current_time.c_str();
 
 
 int main(int argc, char *argv[]) {	
-	if (argc != 5 && argc != 7) {
-        cout << "Usage: " << argv[0] << " [dimension] [L] [N] [output_filename] [*snapshot_style] [*snapshot_time] " << endl;
+	//if (argc != 5 && argc != 7) {
+	if (argc != 10 && argc != 12) {
+        //cout << "Usage: " << argv[0] << " [dimension] [L] [N] [output_filename] [*snapshot_style] [*snapshot_time] " << endl;
+	cout << "Usage: " << argv[0]
+             << " [dimension] [L] [N] [output_filename]"
+             << " [N_small] [N_large] [R_small] [R_large] [phi_large]"
+             << " [*snapshot_style] [*snapshot_time]" << endl;
         return EXIT_SUCCESS;
     }
     int dimension = atoi(argv[1]);
@@ -89,11 +94,21 @@ int main(int argc, char *argv[]) {
     }
     char *output_filename_ = argv[4];
 
+    // add bimodal parameters
+    int N_small = atoi(argv[5]);
+    int N_large = atoi(argv[6]);
+    double R_small = atof(argv[7]);
+    double R_large = atof(argv[8]);
+    double phi_large = atof(argv[9]);
+
     int snapshot_time = 0;
 	int snapshot_style = 0;
-    if (argc == 7) {
-		snapshot_style = atoi(argv[5]);//0=cluster based, 1=counter based
-        snapshot_time = atoi(argv[6]);
+    //if (argc == 9) {
+    if (argc == 12) {
+		//snapshot_style = atoi(argv[5]);//0=cluster based, 1=counter based
+		snapshot_style = atoi(argv[10]);//0=cluster based, 1=counter based
+        //snapshot_time = atoi(argv[6]);
+        snapshot_time = atoi(argv[11]);
 		if (snapshot_style != 0 && snapshot_style != 1) {
 			cerr << "Required: " << "snapshot style = 0 (cluster based) or 1 (counter based)." << endl;
 			cerr << "Exiting..." << endl;
@@ -110,9 +125,16 @@ int main(int argc, char *argv[]) {
 
 	char foldername[buffer_size];
 	//sprintf(foldername, "%s_D%d_L%d_N%d_SS%d_ST%d", chartime, dimension, L, N, snapshot_style, snapshot_time);
-	double phi = round((((4.0/3.0)*M_PI*pow(0.5,3)*N)/pow(L,3)) * 1000) / 1000.0; // calculate volume fraction [RHEOINF]
+	//double phi = round((((4.0/3.0)*M_PI*pow(0.5,3)*N)/pow(L,3)) * 1000) / 1000.0; // calculate volume fraction [RHEOINF]
+        double sphere_vol_S = (4.0/3.0) * M_PI * pow(R_small, 3);
+        double sphere_vol_L = (4.0/3.0) * M_PI * pow(R_large, 3);
+        double vol_S = sphere_vol_S * N_small;
+        double vol_L = sphere_vol_L * N_large;
+        double total_volume = vol_L + vol_S;
+        double phi = total_volume / pow(L,3);
         //std::cout << phi << std::endl;
-	sprintf(foldername, "L%d_phi%.3f", L, phi); // change filename for 3D sim with spheres [RHEOINF]
+	//sprintf(foldername, "L%d_phi%.3f", L, phi); // change filename for 3D sim with spheres [RHEOINF]
+        sprintf(foldername, "L%d_phi%.3f_Rs%.2f_Rl%.2f_phiL%.3f", L, phi, R_small, R_large, phi_large);
 	if (0 != access(foldername, 0)) // for Linux [RHEOINF]
 	{
 		// if this folder not exist, create a new one.
@@ -127,14 +149,16 @@ int main(int argc, char *argv[]) {
             cerr << "Required: " << "N <= " << num_grid << endl;
             return EXIT_FAILURE;
         }
-        p_dlca = new Dlca2D(L, N);
+        //p_dlca = new Dlca2D(L, N);
+        p_dlca = new Dlca2D(L, N, N_small, N_large, R_small, R_large, phi_large);
     } else if (dimension == 3) {
         int num_grid = Dlca3D::get_num_grid_from_L(L);
         if (N > num_grid) {
             cerr << "Required: " << "N <= " << num_grid << endl;
             return EXIT_FAILURE;
         }
-        p_dlca = new Dlca3D(L, N);
+        //p_dlca = new Dlca3D(L, N);
+        p_dlca = new Dlca3D(L, N, N_small, N_large, R_small, R_large, phi_large);
     } else {
         cerr << "Cannot handle dimension = " << dimension << endl;
         cerr << "Exiting..." << endl;

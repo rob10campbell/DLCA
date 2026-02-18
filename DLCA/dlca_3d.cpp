@@ -25,14 +25,39 @@ using std::endl;
 using std::find;
 using std::forward_list;
 
+// cluster radius calc
+double Dlca3D::cluster_radius(Label label) const {
+    double vol = 0.0;
+
+    for (Pid pid : clusters_[label]) {
+        double r = get_radius(pid);
+        vol += r * r * r;
+    }
+
+    return cbrt(vol);
+}
+
 int Dlca3D::get_num_grid_from_L(int L) {
     return L * L * L;
 }
 
 const int Dlca3D::neighbors[] = {-1, 0, 1};
 
-Dlca3D::Dlca3D(int L, int N) :
-    Dlca(N, get_num_grid_from_L(L)),
+//Dlca3D::Dlca3D(int L, int N) :
+//    Dlca(N, get_num_grid_from_L(L)),
+Dlca3D::Dlca3D(int L, int N,
+               int N_small,
+               int N_large,
+               double R_small,
+               double R_large,
+               double phi_large) :
+    Dlca(N,
+         get_num_grid_from_L(L),
+         N_small,
+         N_large,
+         R_small,
+         R_large,
+         phi_large),
     L(L),
     x_(new int[N]),
     y_(new int[N]),
@@ -90,6 +115,12 @@ Dlca3D::~Dlca3D() {
 }
 
 void Dlca3D::diffuse_(Label label) {
+
+    // Diffusion scaling
+    double R_cluster = cluster_radius(label);
+    double D = 1.0 / R_cluster;
+    std::uniform_real_distribution<double> uni(0.0, 1.0);
+    if (uni(rand_engine) > D) return;
 
     // Choose a diffuse direction at random (26 choices)
     int vx, vy, vz;
@@ -170,10 +201,23 @@ void Dlca3D::diffuse_(Label label) {
                             periodic(z_[pid] + dz)
                         );
                         if (pid_neighbor == EMPTY) continue;
-                        Label label_neighbor = uf_forest_.find(pid_neighbor);
+                        //Label label_neighbor = uf_forest_.find(pid_neighbor);
+                        //if (label == label_neighbor) continue;
+                        //pid_list_to_join_lhs.push_front(pid);
+                        //pid_list_to_join_rhs.push_front(pid_neighbor);
+			Label label_neighbor = uf_forest_.find(pid_neighbor);
                         if (label == label_neighbor) continue;
-                        pid_list_to_join_lhs.push_front(pid);
-                        pid_list_to_join_rhs.push_front(pid_neighbor);
+                        // distance check using radii
+                        double dx_real = x_[pid] - x_[pid_neighbor];
+                        double dy_real = y_[pid] - y_[pid_neighbor];
+                        double dz_real = z_[pid] - z_[pid_neighbor];
+                        double dist2 = dx_real*dx_real + dy_real*dy_real + dz_real*dz_real;
+                        double rsum = get_radius(pid) + get_radius(pid_neighbor);
+                        if (dist2 <= rsum * rsum) {
+                            pid_list_to_join_lhs.push_front(pid);
+                            pid_list_to_join_rhs.push_front(pid_neighbor);
+                        }
+
                     }
                 }
             }
@@ -247,8 +291,20 @@ void Dlca3D::diffuse_(Label label) {
                                 periodic(z_[pid] + dz)
                             );
                             if (pid_neighbor == EMPTY) continue;
-                            Label label_neighbor = uf_forest_.find(pid_neighbor);
-                            if (label_neighbor == label) {
+                            //Label label_neighbor = uf_forest_.find(pid_neighbor);
+                            //if (label_neighbor == label) {
+                            //    pid_list_to_join_lhs.push_front(pid);
+                            //    pid_list_to_join_rhs.push_front(pid_neighbor);
+                            //}
+			    Label label_neighbor = uf_forest_.find(pid_neighbor);
+                            if (label_neighbor != label) continue; // only collisions WITH the moving cluster
+                            // distance check using radii
+                            double dx_real = x_[pid] - x_[pid_neighbor];
+                            double dy_real = y_[pid] - y_[pid_neighbor];
+                            double dz_real = z_[pid] - z_[pid_neighbor];
+                            double dist2 = dx_real*dx_real + dy_real*dy_real + dz_real*dz_real;
+                            double rsum = get_radius(pid) + get_radius(pid_neighbor);
+                            if (dist2 <= rsum * rsum) {
                                 pid_list_to_join_lhs.push_front(pid);
                                 pid_list_to_join_rhs.push_front(pid_neighbor);
                             }
@@ -294,7 +350,11 @@ Pid &Dlca3D::grids(Coordinate x, Coordinate y, Coordinate z) const {
 }
 
 void Dlca3D::print_particle(ostream &os, Pid pid)const{
+    //os << periodic(x_[pid] + offset_x_) << ','
+    //   << periodic(y_[pid] + offset_y_) << ','
+    //   << periodic(z_[pid] + offset_z_) ;
     os << periodic(x_[pid] + offset_x_) << ','
-       << periodic(y_[pid] + offset_y_) << ','
-       << periodic(z_[pid] + offset_z_) ;
+         << periodic(y_[pid] + offset_y_) << ','
+         << periodic(z_[pid] + offset_z_) << ','
+         << get_radius(pid);
 }

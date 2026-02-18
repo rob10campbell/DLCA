@@ -25,7 +25,7 @@ using std::endl;
 using std::cin;
 using std::uniform_int_distribution;
 
-Dlca::Dlca(int N, int num_grid):
+/*Dlca::Dlca(int N, int num_grid):
         N(N),
         num_grid_(num_grid),
         grids_(new int[num_grid]),
@@ -49,6 +49,72 @@ Dlca::Dlca(int N, int num_grid):
         // Place pid at gid gid_seq[pid]
         grids_[gid_seq[pid]] = pid;
     }
+    delete[] gid_seq;
+}
+*/
+Dlca::Dlca(int N, int num_grid,
+           int N_small,
+           int N_large,
+           double R_small,
+           double R_large,
+           double phi_large):
+        N(N),
+        num_grid_(num_grid),
+        grids_(new int[num_grid]),
+        uf_forest_(N),
+        clusters_(new Cluster[N]),
+        counter_(0),
+        N_small_(N_small),
+        N_large_(N_large),
+        R_small_(R_small),
+        R_large_(R_large),
+        phi_large_(phi_large),
+        radii_(N),
+        species_(N)
+{
+    // ⭐ Assign species and radii
+    //std::uniform_real_distribution<double> uni(0.0, 1.0);
+
+    //for (Pid pid = 0; pid < N; ++pid) {
+
+    //    if (uni(rand_engine) < phi_large_) {
+    //        species_[pid] = 1; // large
+    //        radii_[pid] = R_large_;
+    //    } else {
+    //        species_[pid] = 0; // small
+    //        radii_[pid] = R_small_;
+    //    }
+    //}
+    for (Pid pid = 0; pid < N; ++pid) {
+        if (pid < N_large_) {
+            radii_[pid] = R_large;
+        } else {
+            radii_[pid] = R_small;
+        }
+    }
+
+    // Initially each particle is one cluster
+    for (Pid pid = 0; pid < N; ++pid) {
+        clusters_[pid].push_front(pid);
+    }
+
+    for (Gid gid = 0; gid < num_grid_; ++gid) {
+        grids_[gid] = EMPTY;
+    }
+
+    // Shuffle grid IDs
+    Gid *gid_seq = new Gid[num_grid_];
+    for (Gid gid = 0; gid < num_grid_; ++gid) {
+        gid_seq[gid] = gid;
+    }
+
+    shuffle(gid_seq, gid_seq + num_grid_, rand_engine);
+
+    // Place particles randomly
+    for (Pid pid = 0; pid < N; ++pid) {
+        grids_[gid_seq[pid]] = pid;
+    }
+
     delete[] gid_seq;
 }
 
@@ -105,8 +171,10 @@ ostream &operator<<(ostream &os, const Dlca &dlca) {
 			<< dlca.get_num_clusters() << ','		// cluster numbers
 			<<pid+1 << ','							// particle label
 			<< dlca.get_clusters_label(pid)+1<<',';	// cluster label
-        dlca.print_particle(os, pid);				// cluster coordinates
-		os <<'\n';
+        //dlca.print_particle(os, pid);				// cluster coordinates
+        dlca.print_particle(os, pid);
+                //os << ',' << dlca.get_radius(pid);
+	 	os <<'\n';
     }
     return os;
 }

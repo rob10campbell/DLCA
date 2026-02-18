@@ -16,6 +16,7 @@
 
 #pragma once
 #include "dlca.h"
+#include <vector>
 
 // Collision: NN + NNN
 // Diffusion: NN + NNN
@@ -23,9 +24,15 @@ class Dlca3D : public Dlca {
 public:
     static int get_num_grid_from_L(int L);
 
-    explicit Dlca3D(int L, int N);
+    explicit Dlca3D(int L, int N,
+       int N_small,
+       int N_large,
+       double R_small,
+       double R_large,
+       double phi_large);
     ~Dlca3D();
 
+    //double get_radius(Pid pid) const;
 
 
 private:
@@ -46,5 +53,11 @@ private:
     int offset_x_ = 0;
     int offset_y_ = 0;
     int offset_z_ = 0;
+
+    double *radius_;      // particle radii
+    int *species_;        // 0 = small, 1 = large
+
+protected:
+    double cluster_radius(Label label) const;
 
 };

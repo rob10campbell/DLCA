@@ -40,7 +40,14 @@ const Pid EMPTY = -1;
 // Abstract base class for DLCA on square lattice of any dimension
 class Dlca {
 public:
-    explicit Dlca(int N, int num_grid);
+    //explicit Dlca(int N, int num_grid);
+    explicit Dlca(int N, int num_grid,
+     int N_small,
+     int N_large,
+     double R_small,
+     double R_large,
+     double phi_large);
+
     virtual ~Dlca();
 
     virtual void visualize() const;
@@ -60,6 +67,10 @@ public:
 	int get_clusters_label(Pid pid) const;
 
 	friend ostream &operator<<(ostream &os, const Dlca &Dlca);
+
+    // bimodal helpers
+    double get_radius(Pid pid) const { return radii_[pid]; }
+    int get_species(Pid pid) const { return species_[pid]; }
 
 
 
@@ -85,6 +96,25 @@ protected:
     Cluster *clusters_;
 
     Label unite_and_splice(Label label_a, Label label_b);
+
+    // Particle radii
+    vector<double> radii_;
+
+    // Species id (0 = small, 1 = large)
+    vector<int> species_;
+
+    // bimodal parameters
+    double R_small_;
+    double R_large_;
+    double phi_large_;
+    int N_small_;
+    int N_large_;
+
+    // collision distance calc
+    double collision_distance(Pid i, Pid j) const {
+         return radii_[i] + radii_[j];
+    }
+
 
 private:
     // Count the number of iterations
